@@ -1,4 +1,4 @@
-FROM node
+FROM node as builder
 RUN npm install -g bower gulp grunt
 RUN npm install -g grunt-cli bower yo generator-karma generator-angular
 RUN apt update
@@ -12,13 +12,17 @@ COPY  Gruntfile.js Gruntfile.js
 COPY package.json package.json
 
 RUN bower --allow-root install
-RUN npm install 
+RUN npm install
 # CMD grunt serve
 RUN grunt build
-RUN mkdir /var/www/html/kompetensutforskaren
-RUN mv dist/* /var/www/html/kompetensutforskaren
 
+FROM nginx
+
+
+RUN mkdir -p /usr/share/nginx/html/
+COPY --from=builder dist/  /usr/share/nginx/html/
 #cat  /etc/nginx/sites-enabled/default
+
 
 COPY default /etc/nginx/sites-enabled/default
 
